@@ -1,0 +1,26 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<table id="sorted" class="table table-striped table-hover">
+    <thead>
+        <tr>
+                <th>Name</th>
+                <th>Printer</th>
+                <th>Type</th>
+                <th>SID</th>
+            </tr>
+    </tbody>
+    <tbody>
+        {% for clientid in data.client %}
+            <tr>
+                <td>{{data.client[clientid].name}}</td>
+                <td>{{data.client[clientid].printer}}</td>
+                <td>{{data.client[clientid].type}}</td>
+                <td>{{clientid}}</td>
+            </tr>
+
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

@@ -1,0 +1,84 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<section id="jobsetup" class="section">
+
+    <div class="row">
+        <div class="col-9">
+
+            <div class="card card-block sameheight-item">
+                <div class="title-block">
+                    <h3 class="title">Job: New <small class="float-right">ID: {{data.job.filename}}</small></h3>
+                </div>
+                <form role="form" enctype="multipart/form-data" action="/api/files/local" method="POST">
+
+                    <input name="client" value="html" type="hidden">
+
+                    <div class="form-group">
+                        <label>Filename</label>
+                        <input name="filename" type="text" class="form-control" placeholder="Job-Name">
+                    </div>
+                    <div class="form-group">
+                        <label>Number of Parts</label>
+                        <input type="number" min="0" max="9999" name="parts" type="text" class="form-control" placeholder="# Parts" value="1">
+                    </div>
+                    <div class="form-group">
+                        <label>Autoprint</label>
+                        <select class="form-control" name="print">
+                            <option value="1">YES</option>
+                            <option selected value="0">NO</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Printer or Group</label>
+                        <select class="form-control" name="printer">
+                            <option value=""></option>
+                            {% for pg in pglist %}
+                                <option value="{{pg}}">{{pg}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Filament</label>
+                        <select class="form-control" name="filament_type">
+                            <option value=""></option>
+                            {% for filament in filamentlist %}
+                                <option value="{{filament}}">{{filament}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Project</label>
+                        <select class="form-control" name="project">
+                            {% for project in data.project %}
+                                {% if project == data.activeProject %}
+                                    <option selected value="{{project}}">{{project}}</option>
+                                {% else %}
+                                    <option value="{{project}}">{{project}}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                  <div class="form-group">
+                    <label for="FormControlFile1">gCode-File</label>
+                    <input type="file" class="form-control-file" id="file" name="file">
+                  </div>
+
+                    <div class="form-group">
+                        <button type="button" class="btn btn-warning float-right" data-bs-dismiss="modal" onclick="window.location.href = '/jobs';">Cancel</button>
+                        <button type="submit" class="btn btn-success float-right">Save</button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+{% endblock %}

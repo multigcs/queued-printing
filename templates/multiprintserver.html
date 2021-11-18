@@ -1,0 +1,45 @@
+{% extends "layout.html" %}
+{% block content %}
+
+    <div class="title-search-block">
+        <div class="title-block">
+            <div class="row">
+                <div class="col-md-12">
+                    <h3 class="title">Multiprint-Server <a href="/multiprintserver-setup?multiprintserver=new" class="btn btn-primary btn-sm rounded-s float-right"> Add New </a></h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="accordion">
+
+    {% for mpsId in data.multiprintserver %}
+
+      <div class="card">
+
+        <div class="card-header row">
+
+            <div class="col-3">
+                {{data.multiprintserver[mpsId].name}}
+            </div>
+            <div class="col-4">
+                <a target="_blank" href="{{data.multiprintserver[mpsId].url}}">{{data.multiprintserver[mpsId].url}}</a>
+            </div>
+            <div class="col-2">
+                {{data.multiprintserver[mpsId].apiKey}}
+            </div>
+            <div class="col-1">
+                {{data.multiprintserver[mpsId].active}}
+            </div>
+            <div class="col-2">
+                <a class="btn btn-primary btn-sm rounded-s" href="/multiprintserver-setup?multiprintserver={{mpsId}}">Setup</a>
+            </div>
+
+        </div>
+
+      </div>
+
+    {% endfor %}
+    </div>
+
+{% endblock %}

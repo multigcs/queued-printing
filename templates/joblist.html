@@ -1,0 +1,24 @@
+
+
+<a href="#" onClick="loadDoc('selectlist', '/joblist?printer={{data.printer}}&printed=1');" class="btn btn-primary btn-sm rounded-s float-right"> SHOW ALL </a>
+
+<table id="sorted" class="table table-striped table-hover">
+    <thead>
+        <tr><th>Thumb</th><th>Date/Name</th><th>Printed</th></tr>
+    </tbody>
+    <tbody style="max-width: 100%;">
+        {% for jobid in data.jobs %}
+            <tr data-dismiss="modal" onclick='job_set("{{data.printer}}", "{{jobid}}");'>
+                <td><img height="64px" src="/image?job={{jobid}}" /></td>
+                <td>{{data.jobs[jobid].date_str}}<br />{{data.jobs[jobid].filename}}</td>
+                <td>{{data.jobs[jobid].printed}} / {{data.jobs[jobid].parts}}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<script>
+
+
+
+</script>

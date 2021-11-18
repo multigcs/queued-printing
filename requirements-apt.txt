@@ -1,0 +1,2 @@
+povray
+perl-base

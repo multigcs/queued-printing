@@ -1,0 +1,6 @@
+[submodule "klipper"]
+	path = klipper
+	url = https://github.com/Klipper3d/klipper.git
+[submodule "PrusaSlicer"]
+	path = PrusaSlicer
+	url = https://github.com/prusa3d/PrusaSlicer.git

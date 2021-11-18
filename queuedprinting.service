@@ -1,0 +1,12 @@
+[Unit]
+Description=Queued-Printing
+Requires=getty.target
+After=getty.target
+AllowIsolate=yes
+
+[Service]
+Type=simple
+ExecStart=/usr/src/queuedprinting/run.sh
+
+[Install]
+WantedBy=getty.target

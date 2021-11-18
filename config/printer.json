@@ -1,0 +1,23 @@
+{
+    "63f25685-caac-4b6e-bb13-ae856ab0ebb3": {
+        "name": "Demo-Printer",
+        "filament": "PETG",
+        "filament_types": [
+            "PLA",
+            "PETG",
+            "NYLON",
+            "ABS",
+            "TPU",
+            "ASA"
+        ],
+        "groups": [
+            "marlin-20x20"
+        ],
+        "image": "generig.jpg",
+        "node": "master",
+        "type": "simulator",
+        "port": "",
+        "baud": "115200",
+        "cmdbuffer": 0
+    }
+}

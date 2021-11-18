@@ -1,0 +1,21 @@
+{
+    "1234": {
+        "name": "v1",
+        "filament": "PLA",
+        "filament_types": [
+            "PLA",
+            "PETG",
+            "ABS",
+            "TPU",
+            "NYLON"
+        ],
+        "groups": [
+            "marlin-20x20"
+        ],
+        "image": "generig.jpg",
+        "node": "master",
+        "type": "simulator",
+        "port": "",
+        "baud": "115200"
+    }
+}

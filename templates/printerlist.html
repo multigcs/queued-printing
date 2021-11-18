@@ -1,0 +1,17 @@
+<table id="sorted" class="table table-striped table-hover">
+    <thead>
+        <tr><th>Thumb</th><th>Date/Name</th><th>Printed</th></tr>
+    </tbody>
+    <tbody style="max-width: 100%;">
+        
+       
+        {% for printerId in data.printers %}
+            <tr data-dismiss="modal" onclick='job_set("{{printerId}}", "{{data.job}}");'>
+                <td><img height="64px" src="/image?image={{data.printers[printerId].image}}" /></td>
+                <td>{{data.printers[printerId].name}}</td>
+                <td>{{data.printerStatus[printerId].status}}</td>
+                <td>{{data.printers[printerId].filament}}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

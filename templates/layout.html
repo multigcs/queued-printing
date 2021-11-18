@@ -1,0 +1,301 @@
+<!doctype html>
+<html class="no-js" lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title> Queued-Printing </title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="stylesheet" href="/static/css/vendor.css">
+        <link rel="stylesheet" href="/static/css/app.css">
+
+        <script src="/static/js/jquery.min.js"></script>
+        <script src="/static/js/socket.io.js"></script>
+        <script src="/static/js/vue.min.js"></script>
+
+        <script type="text/javascript" charset="utf-8">
+        
+            var vprinter = undefined;
+            var allprinterConfig = {};
+            var socket = '';
+            var graphs = {};
+
+            $(document).ready(function() {
+                socket = io.connect(null, {port: 5000, rememberTransport: false});
+
+                socket.on('connect', function() {
+                    console.log("websocket connected");
+                    socket.emit('register', {type: 'webclient'});
+                });
+
+                socket.on('update', function(msg) {
+
+                    console.log("update received");
+
+                    if ("printer" in msg && vprinter != undefined) {
+
+                        if (! (msg.printer in vprinter.printerConfig)) {
+                            vprinter.printerConfig[msg.printer] = {};
+                        }
+                        if (! (msg.printer in vprinter.printerStatus)) {
+                            vprinter.printerStatus[msg.printer] = {};
+                        }
+
+                        if ("config" in msg) {
+                            vprinter.printerConfig[msg.printer] = msg.config;
+                        }
+                        if ("status" in msg) {
+                            vprinter.printerStatus[msg.printer] = msg.status;
+                        }
+
+                    }
+                });
+
+                $('form#emit').submit(function(event) {
+                    socket.emit('update', {data: $('#emit_data').val()});
+                    return false;
+                });
+
+            });
+
+            function job_set(printer, job) {
+                socket.emit('update', {'printer': printer, 'setJob': job}  );
+            }
+
+            function setReady(printer, ready) {
+                socket.emit('update', {'printer': printer, 'status': {'ready': ready}}  );
+            }
+
+            function filament_set(printer, filament) {
+                socket.emit('update', {'printer': printer, 'config': {'filament': filament}}  );
+            }
+
+            function svcommand_set(printer, svcommand) {
+                socket.emit('update', {'printer': printer, 'commands': {'svcommand': svcommand}}  );
+            }
+
+            function loadDoc(id, url) {
+                var xhttp = new XMLHttpRequest();
+                xhttp.onreadystatechange = function() {
+                    if (this.readyState == 4 && this.status == 200) {
+                        document.getElementById(id).innerHTML = this.responseText;
+                   }
+                };
+                xhttp.open("GET", url, true);
+                xhttp.send();
+            } 
+
+            function job_list(printer) {
+                loadDoc("selectlist", "/joblist?printer=" + printer);
+                document.getElementById("selectModalLabel").innerHTML = "Job-Selection";
+                var myModal = new bootstrap.Modal(document.getElementById('selectModal'));
+                myModal.toggle()
+            }
+
+            function printer_list(job) {
+                loadDoc("selectlist", "/printerlist?job=" + job);
+                document.getElementById("selectModalLabel").innerHTML = "Printer-Selection";
+                var myModal = new bootstrap.Modal(document.getElementById('selectModal'));
+                myModal.toggle()
+            }
+
+        </script>
+
+    </head>
+    <body>
+
+        <div class="modal fade" id="selectModal" tabindex="-1" role="dialog" aria-labelledby="selectModalLabel" aria-hidden="true">
+          <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="selectModalLabel">Selection</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body" id="selectlist">
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="main-wrapper">
+            <div class="app" id="app">
+                <header class="header">
+                    <div class="header-block header-block-collapse d-lg-none d-xl-none">
+                        <button class="collapse-btn" id="sidebar-collapse-btn">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                    </div>
+                    <div class="header-block header-block-buttons">
+                        {% for project in data.project %}
+                            {% if project == data.activeProject %}
+                                <a class="btn btn-warning btn-sm" href="/jobs?project={{project}}">{{project}}</a>
+                            {% else %}
+                                <a class="btn btn-info btn-sm" href="/jobs?project={{project}}">{{project}}</a>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </header>
+                <aside class="sidebar">
+                    <div class="sidebar-container">
+                        <div class="sidebar-header">
+                            <div class="brand">
+                                <div>
+                                    <?xml version="1.0"?>
+                                        <svg width="220" height="40" viewBox="0 0 320 40">
+                                          <defs>
+                                            <linearGradient id="gradient">
+                                              <stop stop-color="#85CE36" offset="0"/>
+                                              <stop stop-color="#C5FE96" offset="0.5"/>
+                                              <stop stop-color="#85CE36" offset="1"/>
+                                            </linearGradient>
+                                          </defs>
+                                          <g transform="matrix(1,0,0,1,0,0)" fill="url(#gradient)">
+                                            <g xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M7,2H17V7H19V13H16.5L13,17H11L7.5,13H5V7H7V2M10,22H2V20H10A1,1 0 0,0 11,19V18H13V19A3,3 0 0,1 10,22M7,9V11H8.5L12,15L15.5,11H17V9H15V4H9V9H7Z" />
+                                                <path transform="matrix(1,0,0,1,15,15)" d="M7,2H17V7H19V13H16.5L13,17H11L7.5,13H5V7H7V2M10,22H2V20H10A1,1 0 0,0 11,19V18H13V19A3,3 0 0,1 10,22M7,9V11H8.5L12,15L15.5,11H17V9H15V4H9V9H7Z" />
+                                            </g>
+                                          </g>
+                                          <g fill="url(#gradient)">
+                                            <text id="eins" x="40" y="25" font-size="2em">Queued-Printing</text>
+                                          </g>
+                                        </svg>
+                                </div>
+                            </div>
+                        </div>
+                        <nav class="menu">
+                            <ul class="sidebar-menu metismenu" id="sidebar-menu">
+                                <li {% if page == 'overview' %}class="active"{% endif %}>
+                                    <a href="/">
+                                        <i class="fa fa-home"></i> Overview </a>
+                                </li>
+                                <li {% if page == 'printer' %}class="active"{% endif %}>
+                                    <a href="/printer">
+                                        <i class="fa fa-print"></i> Printer </a>
+                                </li>
+                                <li {% if page == 'jobs' %}class="active"{% endif %}>
+                                    <a href="/jobs">
+                                        <i class="fa fa-tasks"></i> Jobs </a>
+                                </li>
+                                <li {% if page == 'nodes' %}class="active"{% endif %}>
+                                    <a href="/nodes">
+                                        <i class="fa fa-cloud"></i> Nodes </a>
+                                </li>
+                                <li {% if page == 'clients' %}class="active"{% endif %}>
+                                    <a href="/clients">
+                                        <i class="fa fa-desktop"></i> Clients </a>
+                                </li>
+                                <li {% if page == 'multiprintserver' %}class="active"{% endif %}>
+                                    <a href="/multiprintserver">
+                                        <i class="fa fa-desktop"></i> Multiprint-Server </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                    <footer class="sidebar-footer"></footer>
+                </aside>
+                <div class="sidebar-overlay" id="sidebar-overlay"></div>
+                <div class="sidebar-mobile-menu-handle" id="sidebar-mobile-menu-handle"></div>
+                <div class="mobile-menu-handle"></div>
+                <article class="content dashboard-page">
+
+
+      {% block content %}{% endblock %}
+
+
+                </article>
+                <footer class="footer">
+                    <div class="footer-block buttons">
+                        
+                    </div>
+                    <div class="footer-block author">
+                        <ul>
+                            <li></li>
+                        </ul>
+                    </div>
+                </footer>
+                <div class="modal fade" id="modal-media">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h4 class="modal-title">Media Library</h4>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                    <span class="sr-only">Close</span>
+                                </button>
+                            </div>
+                            <div class="modal-body modal-tab-container">
+                                <ul class="nav nav-tabs modal-tabs" role="tablist">
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="#gallery" data-toggle="tab" role="tab">Gallery</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link active" href="#upload" data-toggle="tab" role="tab">Upload</a>
+                                    </li>
+                                </ul>
+                                <div class="tab-content modal-tab-content">
+                                    <div class="tab-pane fade" id="gallery" role="tabpanel">
+                                        <div class="images-container">
+                                            <div class="row">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="tab-pane fade active in" id="upload" role="tabpanel">
+                                        <div class="upload-container">
+                                            <div id="dropzone">
+                                                <form action="/" method="POST" enctype="multipart/form-data" class="dropzone needsclick dz-clickable" id="demo-upload">
+                                                    <div class="dz-message-block">
+                                                        <div class="dz-message needsclick"> Drop files here or click to upload. </div>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-primary">Insert Selected</button>
+                            </div>
+                        </div><!-- /.modal-content -->
+                    </div><!-- /.modal-dialog -->
+                </div><!-- /.modal -->
+                <div class="modal fade" id="confirm-modal">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h4 class="modal-title"><i class="fa fa-warning"></i> Alert</h4>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <p>Are you sure want to do this?</p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-primary" data-dismiss="modal">Yes</button>
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
+                            </div>
+                        </div><!-- /.modal-content -->
+                    </div><!-- /.modal-dialog -->
+                </div><!-- /.modal -->
+            </div>
+        </div>
+        <!-- Reference block for JS -->
+        <div class="ref" id="ref">
+            <div class="color-primary"></div>
+            <div class="chart">
+                <div class="color-primary"></div>
+                <div class="color-secondary"></div>
+            </div>
+        </div>
+        <script src="/static/js/vendor.js"></script>
+        <script src="/static/js/app.js"></script>
+
+    </body>
+</html>

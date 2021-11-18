@@ -1,0 +1,97 @@
+{% extends "layout.html" %}
+{% block content %}
+
+    <div class="title-search-block">
+        <div class="title-block">
+            <div class="row">
+                <div class="col-md-12">
+                    <h3 class="title">Jobs ({{jobs|length}}/{{data.job|length}})
+                    <a href="/job-setup?job=new" class="btn btn-primary btn-sm rounded-s float-right"> Add New </a>
+                    <a href="/jobs?printed=1" class="btn btn-primary btn-sm rounded-s float-right"> SHOW ALL </a>
+                    </h3>
+                    <!-- input v-model="search" type="text" class="form-control boxed rounded-s w-25" placeholder="Search for..."-->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="accordion">
+
+    {% for jobid in jobs %}
+
+      <div class="card">
+
+        <div class="card-header row" id="headingOne"  data-toggle="collapse" data-target="#jn{{loop.index}}" aria-expanded="true" aria-controls="jn{{loop.index}}">
+
+            <div class="col-1">
+                <img style="max-width: 100%;" height="64px" src="/image?job={{jobid}}" />
+            </div>
+            <div class="col-1">
+                {{jobs[jobid].date_str}}
+            </div>
+            <div class="col-4">
+                {{jobs[jobid].filename}}
+            </div>
+            <div class="col-1">
+                {{jobs[jobid].duration}}
+            </div>
+            <div class="col-1">
+                {{jobs[jobid].filament_g}} g
+            </div>
+            <div class="col-1">
+                {{jobs[jobid].printed}} / {{jobs[jobid].parts}}
+            </div>
+            <div class="col-1">
+                {{jobs[jobid].printer}} <br /> {{jobs[jobid].filament_type}}
+            </div>
+            <div class="col-2">
+                <a class="btn btn-primary btn-sm rounded-s" href="/gcodefile?job={{jobid}}">Download</a>
+
+                <a class="btn btn-primary btn-sm rounded-s" target="_blank" href="/static/gcode-preview/index.html?job={{jobid}}">3D-View</a>
+
+                <a class="btn btn-primary btn-sm rounded-s" href="/job-setup?job={{jobid}}">Setup</a>
+
+                <button type="button" class="btn btn-sm btn-primary" data-bs-dismiss="modal" onclick="printer_list('{{jobid}}');">PRINT</button>
+
+                <button type="button" class="btn btn-danger btn-sm rounded-s dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">DELETE</button>
+                <div class="dropdown-menu" x-placement="bottom-start" style="position: absolute; will-change: transform; top: 0px; left: 0px; transform: translate3d(0px, 32px, 0px);">
+                    <a class="dropdown-item" href="#" :name="job" onclick="window.location.href = '/job-setup?job={{jobid}}&delete=job';">Realy DELETE</a>
+                </div>
+
+            </div>
+
+        </div>
+
+        <div id="jn{{loop.index}}" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
+          <div class="card-body">
+
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Key</th>
+                        <th>Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                {% for key in jobs[jobid] %}
+                    <tr>
+                        <th scope="row">{{key}}</th>
+                        <td>{{jobs[jobid][key]}}</td>
+                    </tr>
+
+
+                {% endfor %}
+
+                </tbody>
+            </table>
+
+          </div>
+        </div>
+
+      </div>
+
+    {% endfor %}
+    </div>
+
+{% endblock %}

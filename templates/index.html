@@ -1,0 +1,327 @@
+{% extends "layout.html" %}
+{% block content %}
+
+
+
+<section id="printers" class="section">
+
+    ${getShortInfo()}
+
+    <div class="row sameheight-container">
+
+        <div v-for="(printer, printerId, index) in printerConfig" v-if="printerStatus[printerId].running == '1' && printerStatus[printerId].status != 'OFFLINE'" class="col col-12 col-sm-12 col-md-6 col-lg-6 col-xl-4 stats-col">
+
+            <div :class="cardClass(printerId)" data-exclude="xs">
+                <div class="card-block">
+
+                    <div class="title-block">
+                        <h4 class="title">${printerConfig[printerId].name}:
+                          (
+                          <i v-if="printerStatus[printerId].status == 'STARTUP'" class="text-info">${printerStatus[printerId].status}</i>
+                          <i v-else-if="printerStatus[printerId].status == 'STANDBY'" class="text-success">${printerStatus[printerId].status}</i>
+                          <i v-else-if="printerStatus[printerId].status == 'INIT'" class="text-warning">${printerStatus[printerId].status}</i>
+                          <i v-else-if="printerStatus[printerId].status == 'HEATING'" class="text-warning">${printerStatus[printerId].status}</i>
+                          <i v-else-if="printerStatus[printerId].status == 'PRINTING'" class="text-info">${printerStatus[printerId].status}</i>
+                          <i v-else-if="printerStatus[printerId].status == 'FINISHED'" class="">${printerStatus[printerId].status}</i>
+                          <i v-else class="text-danger">${printerStatus[printerId].status}</i>
+                          )
+                          <i v-if="printerStatus[printerId].status == 'PRINTING'" class="float-right">
+                            <small>${timeformat(printerStatus[printerId].remaining)} / ${timeformat(parseInt(printerStatus[printerId].duration / 60))} (${printerStatus[printerId].percent} %)</small>
+                          </i>
+                        </h4>
+                        <div class="progress stat-progress">
+                            <div class="progress-bar" :style="setWidth(100, printerStatus[printerId].percent)"></div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-4 justify-content-center align-self-center">
+                            <img style="max-height: 120px; max-width: 100%;" v-if="printerConfig[printerId].webcam == '1'" :src="getCamUrl(printerConfig[printerId].url)" />
+                            <img style="max-height: 120px; max-width: 100%;" v-else-if="printerStatus[printerId].active.jobId" :src="getJobImage(printerStatus[printerId].active)" />
+                            <img style="max-height: 120px; max-width: 100%;" v-else :src="getPrinterImage(printerConfig[printerId].image)" />
+                        </div>
+
+                        <div class="col-4">
+                            <div class="row row-sm stats-container">
+                                <div class="col-12 text-right">
+                                    <small>Hotend:</small> ${printerStatus[printerId].hotend} / ${printerStatus[printerId].hotend_set}°C<br />
+                                    <div class="progress stat-progress">
+                                        <div class="progress-bar" :style="setWidth(printerStatus[printerId].hotend_set, printerStatus[printerId].hotend)"></div>
+                                    </div>
+                                </div>
+                                <div class="col-12 text-right">
+                                    <small>Bed:</small> ${printerStatus[printerId].bed} / ${printerStatus[printerId].bed_set}°C<br />
+                                    <div class="progress stat-progress">
+                                        <div class="progress-bar" :style="setWidth(printerStatus[printerId].bed_set, printerStatus[printerId].bed)"></div>
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    &nbsp;<br />
+                                </div>
+                                <div class="col-12">
+                                    &nbsp;<br />
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <div class="col-4">
+                            <svg viewBox="0 0 300 200" style="background-color: #FAFAFA;">
+                              <text x='2' y='16'>300</text>
+                              <polyline
+                                 fill="none"
+                                 stroke="#ABABAB"
+                                 stroke-width="1"
+                                 points="36,10 300,10"
+                              />
+
+                              <text x='2' y='46'>250</text>
+                              <polyline
+                                 fill="none"
+                                 stroke="#ABABAB"
+                                 stroke-width="1"
+                                 points="36,40 300,40"
+                              />
+
+                              <text x='2' y='76'>200</text>
+                              <polyline
+                                 fill="none"
+                                 stroke="#ABABAB"
+                                 stroke-width="1"
+                                 points="36,70 300,70"
+                              />
+
+                              <text x='2' y='106'>150</text>
+                              <polyline
+                                 fill="none"
+                                 stroke="#ABABAB"
+                                 stroke-width="1"
+                                 points="36,100 300,100"
+                              />
+
+                              <text x='2' y='136'>100</text>
+                              <polyline
+                                 fill="none"
+                                 stroke="#ABABAB"
+                                 stroke-width="1"
+                                 points="36,130 300,130"
+                              />
+
+                              <text x='10' y='166'>50</text>
+                              <polyline
+                                 fill="none"
+                                 stroke="#ABABAB"
+                                 stroke-width="1"
+                                 points="36,160 300,160"
+                              />
+
+                              <text x='18' y='196'>0</text>
+                              <polyline
+                                 fill="none"
+                                 stroke="#ABABAB"
+                                 stroke-width="1"
+                                 points="36,190 300,190"
+                              />
+
+                              <polyline
+                                 fill="none"
+                                 stroke="#FFAAAB"
+                                 stroke-width="2"
+                                 :points="graphLine(printerId, 'bed_set_history')"
+                              />
+                              <polyline
+                                 fill="none"
+                                 stroke="#FFABAB"
+                                 stroke-width="2"
+                                 :points="graphLine(printerId, 'hotend_set_history')"
+                              />
+                              <polyline
+                                 fill="none"
+                                 stroke="#FFAA00"
+                                 stroke-width="5"
+                                 :points="graphLine(printerId, 'bed_history')"
+                              />
+                              <polyline
+                                 fill="none"
+                                 stroke="#FF0000"
+                                 stroke-width="5"
+                                 :points="graphLine(printerId, 'hotend_history')"
+                              />
+                            </svg>
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+                        <div class="col-12 text-center">
+                            <small>${getJobName(printerStatus[printerId].active)}</small>
+                        </div>
+                    </div>
+
+
+                    <div class="row">
+                        <div class="col-12">
+                            <button v-if="printerStatus[printerId].ready == 0 && (printerStatus[printerId].status == 'STANDBY' || printerStatus[printerId].status == 'FINISHED')"  type="button" class="w-25 btn btn-sm btn-danger" :name="printerId" onclick="setReady(this.name, 1);">SET READY</button>
+                            <button v-else-if="printerStatus[printerId].status == 'STANDBY'" type="button" class="w-25 btn btn-sm btn-primary" data-bs-dismiss="modal" :name="printerId" onclick="job_list(this.name);">SET JOB</button>
+                            <button v-else type="button" class="w-25 btn btn-sm btn-primary" data-bs-dismiss="modal" :name="printerId">---</button>
+                            <button type="button" class="w-25 btn btn-sm btn-warning" data-bs-dismiss="modal" :name="printerId" onclick="window.location.href = '/printer-setup?printer=' + this.name;">SETUP</button>
+                            <select @change="onChange(printerId, $event)" class="btn btn-sm btn-info" v-model="printerConfig[printerId].filament" >
+                                <option v-for="filament in printerConfig[printerId].filament_types">${filament}</option>
+                            </select>
+
+
+                            <div class="btn-group show">
+                                <button type="button" class="btn btn-danger btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">KILL</button>
+                                <div class="dropdown-menu" x-placement="bottom-start" style="position: absolute; will-change: transform; top: 0px; left: 0px; transform: translate3d(0px, 32px, 0px);">
+                                    <a class="dropdown-item" href="#" :name="printerId" onclick="svcommand_set(this.name, 'KILL');">Realy KILL</a>
+                                    <a class="dropdown-item" href="#" :name="printerId" onclick="setReady(this.name, 0);">Not Ready</a>
+
+                                    <a class="dropdown-item" href="#" :name="printerId" onclick="svcommand_set(this.name, 'M104 S0');">Hotend Off</a>
+                                    <a class="dropdown-item" href="#" :name="printerId" onclick="svcommand_set(this.name, 'M140 S0');">Bed Off</a>
+
+                                </div>
+                            </div>
+
+
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</section>
+
+
+<button type="button" class="w-100 btn btn-sm btn-danger" :name="printerId" onclick="setAllReady();">SET ALL READY</button>
+
+<script>
+
+    function setAllReady() {
+        for (printerId in {{data.printerConfig|safe}}) {
+            setReady(printerId, 1);
+        }
+    }
+
+
+    var vprinter = new Vue({
+        el: '#printers',
+        delimiters: ['${', '}'],
+
+        data: {
+            printerConfig: {{data.printerConfig|safe}},
+            printerStatus: {{data.printerStatus|safe}},
+            jobs: {{data.job|safe}},
+            chart_labels: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
+        },
+
+        methods: {
+            getShortInfo() {
+                minTime = 999999999999999999999;
+                maxTime = 0;
+                for (printerId in this.printerStatus) {
+                    if (this.printerStatus[printerId].status != "PRINTING" && this.printerStatus[printerId].status != "HEATING") {
+                        continue;
+                    }
+                    remaining = this.printerStatus[printerId]["remaining"];
+                    if (remaining > 0 && remaining < minTime) {
+                        minTime = remaining;
+                    }
+                    if (remaining > 0 && remaining > maxTime) {
+                        maxTime = remaining;
+                    }
+                }
+                shortInfo = "";
+                if (minTime < 999999999999999999999) {
+                    shortInfo = "next in " + this.timeformat(minTime);
+                }
+                if (maxTime > 0) {
+                    if (shortInfo != "") {
+                        shortInfo += " / ";
+                    }
+                    shortInfo += "last in " + this.timeformat(maxTime);
+                }
+                return shortInfo;
+            },
+            setWidth(vmax, value) {
+                vmax = parseFloat(vmax);
+                value = parseFloat(value);
+                if (vmax == 0) {
+                    percent = 0;
+                } else {
+                    percent = parseInt(value / (vmax) * 100);
+                }
+                return "width: " + percent + "%;";
+            },
+            timeformat(minutes) {
+                if (minutes > 60) {
+                    h = parseInt(minutes / 60);
+                    m = parseInt(minutes % (h * 60))
+                    return h + " h " + m + " m";
+                }
+                return minutes + " m";
+            },
+            idFormat(name) {
+                return name.toLowerCase().replaceAll(" ", "_").replaceAll("-", "_");
+            },
+            getCamUrl(url) {
+                return url + "/webcam/?action=stream";
+            },
+            getPrinterImage(image) {
+                return "/image?image=" + image;
+            },
+            getJobImage(job) {
+                return "/image?job=" + job.jobId;
+            },
+            getJobName(job) {
+                if (job.jobId in this.jobs) {
+                    return this.jobs[job.jobId].filename;
+                } else if (job != "") {
+                    return job;
+                }
+                return "No job slected";
+            },
+            onChange:function(printer, event){
+                console.log(event.target.value);
+                filament_set(printer, event.target.value);
+            },
+
+            graphLine:function(printer, key){
+                points = [];
+
+                if (printer in this.printerConfig) {
+                    width = 300 - 36;
+                    height = 200 - 20;
+                    yrange = 300;
+                    dataset = this.printerStatus[printer][key];
+                    maxv = dataset.length;
+                    for (num in dataset) {
+                        value = dataset[num];
+                        x = num * width / (maxv - 1);
+                        y = height - (value * height / yrange)
+                        points.push(parseInt(x + 36) + "," + parseInt(y + 10));
+                    }
+                }
+                return points.join(" ");
+            },
+            cardClass(printer) {
+                if (this.printerStatus[printer].status == "FINISHED") {
+                    return "card sameheight-item stats bg-success"
+                } else if (this.printerStatus[printer].status == "ERROR") {
+                    return "card sameheight-item stats bg-danger"
+                } else if (this.printerStatus[printer].status == "STANDBY" && this.printerStatus[printer].ready == "0") {
+                    return "card sameheight-item stats bg-warning"
+                }
+                return "card sameheight-item stats"
+            }
+        },
+    })
+
+</script>
+
+
+
+{% endblock %}

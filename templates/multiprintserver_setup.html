@@ -1,0 +1,67 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<section id="multiprintserversetup" class="section">
+
+    <div class="row">
+        <div class="col-9">
+
+            <div class="card card-block sameheight-item">
+                <div class="title-block">
+                    <h3 class="title">Multiprint-Server: {{setup.name}} <small class="float-right">ID: {{multiprintserver}}</small></h3>
+                </div>
+                <form role="form" action="/multiprintserver-setup" method="get">
+
+                    <input value="{{multiprintserver}}" name="multiprintserver" type="hidden">
+
+                    <div class="form-group">
+                        <label>Name</label>
+                        <input type="text" class="form-control" name="name" value="{{setup.name}}" placeholder="Job-Name">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Active</label>
+                        <input type="text" class="form-control" name="active" value="{{setup.active}}" placeholder="Active">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Type</label>
+                        <select v-model="{{setup.type}}" name="type" class="form-control">
+                            <option>repetierserver</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Url</label>
+                        <input type="text" class="form-control" name="url" value="{{setup.url}}" placeholder="Printed">
+                    </div>
+
+                    <div class="form-group">
+                        <label>API-Key</label>
+                        <input type="text" class="form-control" name="apiKey" value="{{setup.apiKey}}" placeholder="Parts">
+                    </div>
+
+                    <div class="form-group">
+                        <div class="btn-group show">
+                            <button type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">DELETE</button>
+                            <div class="dropdown-menu" x-placement="bottom-start" style="position: absolute; will-change: transform; top: 0px; left: 0px; transform: translate3d(0px, 32px, 0px);">
+                                <a class="dropdown-item" href="#" :name="job" onclick="window.location.href = '/multiprintserver-setup?multiprintserver={{multiprintserver}}&delete=multiprintserver';">Realy DELETE</a>
+                            </div>
+                        </div>
+
+                        <button type="button" class="btn btn-warning float-right" data-bs-dismiss="modal" onclick="window.location.href = '/multiprintserver';">Cancel</button>
+                        <button type="submit" class="btn btn-success float-right">Save</button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+
+        <div class="col-3">
+            <img width="100%" src="/image?job={{job}}" /><br />
+        </div>
+    </div>
+
+</section>
+
+{% endblock %}

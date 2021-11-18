@@ -1,0 +1,5 @@
+config/
+jobs/
+docs/html/
+static/logo.png
+__pycache__/

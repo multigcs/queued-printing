@@ -1,0 +1,175 @@
+{% extends "layout.html" %}
+{% block content %}
+
+
+<section id="printers" class="section">
+
+    <div class="title-search-block">
+        <div class="title-block">
+            <div class="row">
+                <div class="col-md-12">
+                    <h3 class="title">Nodes <a href="/node-setup?node=new" class="btn btn-primary btn-sm rounded-s float-right"> Add New </a></h3>
+                    <input v-model="search" type="text" class="form-control boxed rounded-s w-25" placeholder="Search for...">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="accordion">
+
+      <div v-for="(node, nodeId, index) in nodes" v-if="filter(node)" class="card">
+
+        <div class="card-header row" id="headingOne"  data-toggle="collapse" :data-target="'#ac_' + index" aria-expanded="true" :aria-controls="'ac_' + index">
+            <div class="col-2">
+                ${nodeId}
+            </div>
+            <div class="col-3">
+                <i v-if="node.status == 'ONLINE'" class="text-success">${node.status}</i>
+                <i v-else class="text-danger">${node.status}</i>
+            </div>
+            <div v-if="node.system" class="col-6">
+                ${node.system.ips}
+            </div>
+            <div v-else class="col-6">
+                ---
+            </div>
+            <div class="col-1">
+                <div v-if="nodeId != 'master'" class="btn-group show">
+                    <button type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">DELETE</button>
+                    <div class="dropdown-menu" x-placement="bottom-start" style="position: absolute; will-change: transform; top: 0px; left: 0px; transform: translate3d(0px, 32px, 0px);">
+                        <a class="dropdown-item" href="#" :name="nodeId" onclick="window.location.href = '/node-setup?node=' + this.name + '&delete=node';">Realy DELETE</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div :id="'ac_' + index" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
+          <div class="card-body">
+
+            <h4>Devices:</h4>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th width="20%">Device</th>
+                        <th>Path</th>
+                        <th>Printer</th>
+                        <th>Main-Port</th>
+                        <th>Hub-Port</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="value, key in node.devices">
+                        <th scope="row">${key}</th>
+                        <td >${value.path}</td>
+
+                        <td>${value.printer}</td>
+
+                        <td v-if="value.rpiport != ''"><img height="48px" :src="rpiPort(value.rpiport)" /></td>
+                        <td v-else>NONE</td>
+                        <td v-if="value.hubport != ''">${hubPort(value.hubport)}</td>
+                        <td v-else>NONE</td>
+
+                    </tr>
+                </tbody>
+            </table>
+
+            <h4>System:</h4>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th width="20%">Key</th>
+                        <th>Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="value, key in node.system">
+                        <th scope="row">${key}</th>
+                        <td v-if="key != 'ips'">${value}</td>
+                        <td v-if="key == 'ips'">
+
+
+                            <i v-for="iplist, device in value">
+
+                                <b>${device}:</b> <i v-for="ip in iplist">${ip}</i> <br />
+                            
+                            </i>
+                            
+                            <br />
+
+
+                        </td>
+                    </tr>
+
+
+                </tbody>
+            </table>
+
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+</section>
+
+
+<script>
+
+    var vprinter = new Vue({
+        el: '#printers',
+        delimiters: ['${', '}'],
+
+        data: {
+            search: "",
+            nodes: {{data.node|safe}},
+            chart_labels: ['', '', '', '', '', '', '', '', '', ''],
+        },
+
+        methods: {
+            filter(node) {
+                console.log()
+                if (this.search == "" || node.nodeId.toLowerCase().search(this.search.toLowerCase()) >=0) {
+                    return true;
+                }
+                return false;
+            },
+            rpiPort(port) {
+                return "/static/rpi-front" + port + ".jpg";
+            },
+            hubPort(port) {
+                var ret = "";
+                if (port == 1) {
+                    ret = "[x] [] [] []";
+                } else if (port == 2) {
+                    ret = "[] [x] [] []";
+                } else if (port == 3) {
+                    ret = "[] [] [x] []";
+                } else if (port == 4) {
+                    ret = "[] [] [] [x]";
+                } else {
+                    ret = "Port-" + port;
+                }
+                return ret;
+            },
+            getCamUrl(url) {
+                return url + "/webcam/?action=stream";
+            },
+            getPrinterImage(image) {
+                return "/image?image=" + image;
+            },
+            getJobImage(jid) {
+                return "/image?job=" + jid;
+            },
+            onChange:function(printer, event){
+                console.log(event.target.value);
+                filament_set(printer, event.target.value);
+            },
+        },
+    })
+
+</script>
+
+
+{% endblock %}
+

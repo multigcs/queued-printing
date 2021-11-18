@@ -1,0 +1,76 @@
+{
+    "date": 1634057262.2216256,
+    "filename": "20mm_calibration_cube_0.28mm_PLA_marlin_26m.gcode",
+    "size": 239646,
+    "printed": "0",
+    "parts": "1",
+    "autoprint": "0",
+    "thumbs": [
+        "16x16",
+        "220x124"
+    ],
+    "history": {
+        "1634644189.4423208": {
+            "printer": "c888c2c6-063f-4d52-819e-81ccba2b3aa5",
+            "status": {
+                "jobId": "91e1cfcc-c393-43df-b905-ab4ce2d1c6ed",
+                "traceId": "91e1cfcc-c393-43df-b905-ab4ce2d1c6ed-1634644189.4410167",
+                "status": "STANDBY"
+            }
+        },
+        "1634644191.632965": {
+            "printer": "c888c2c6-063f-4d52-819e-81ccba2b3aa5",
+            "status": {
+                "jobId": "91e1cfcc-c393-43df-b905-ab4ce2d1c6ed",
+                "traceId": "91e1cfcc-c393-43df-b905-ab4ce2d1c6ed-1634644189.4410167",
+                "status": "PRINTING"
+            }
+        },
+        "1634644202.055173": {
+            "printer": "c888c2c6-063f-4d52-819e-81ccba2b3aa5",
+            "status": {
+                "jobId": "91e1cfcc-c393-43df-b905-ab4ce2d1c6ed",
+                "traceId": "91e1cfcc-c393-43df-b905-ab4ce2d1c6ed-1634644202.0537217",
+                "status": "STANDBY"
+            }
+        },
+        "1634644205.1916995": {
+            "printer": "c888c2c6-063f-4d52-819e-81ccba2b3aa5",
+            "status": {
+                "jobId": "91e1cfcc-c393-43df-b905-ab4ce2d1c6ed",
+                "traceId": "91e1cfcc-c393-43df-b905-ab4ce2d1c6ed-1634644202.0537217",
+                "status": "PRINTING"
+            }
+        }
+    },
+    "filament_type": "PETG",
+    "filament_mm": "1208.38",
+    "filament_cm3": "2.91",
+    "filament_g": "3.60",
+    "filament_cost": "0.07",
+    "total_g": "3.60",
+    "total_cost": "0.07",
+    "duration": "26m 4s",
+    "printer": "marlin-20x20",
+    "estimatedPrintTime": 1562.0463117754036,
+    "printingArea": {
+        "maxX": 128.2530059814453,
+        "maxY": 190.0,
+        "maxZ": 20.079999923706055,
+        "minX": 2.0,
+        "minY": 10.0,
+        "minZ": 0.20000000298023224
+    },
+    "dimensions": {
+        "width": 126.25300598144531,
+        "depth": 180.0,
+        "height": 19.879999920725822
+    },
+    "filament": {
+        "tool0": {
+            "length": 1236.3759126625955,
+            "volume": 2.9738325739142675
+        }
+    },
+    "date_str": "12.10.2021, 18:47:42"
+}

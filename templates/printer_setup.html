@@ -1,0 +1,193 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<section id="printersetup" class="section">
+
+    <div class="row">
+        <div class="col-9">
+
+            <div class="card card-block sameheight-item">
+                <div class="title-block">
+                    <h3 class="title">${config.name} <small class="float-right">ID: ${printer}</small></h3>
+                </div>
+                <form role="form" action="/printer-setup" method="get">
+
+                    <input v-model="printer" name="printer" type="hidden">
+
+                    <div class="form-group">
+                        <label>Name</label>
+                        <input v-model="config.name" name="name" type="text" class="form-control" placeholder="Printer-Name">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Node</label>
+                        <select v-model="config.node" name="node" @change="onChange(printer, $event)" class="form-control">
+                            <option v-for="node, nodeName in nodes">${nodeName}</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Type</label>
+                        <select v-model="config.type" name="type" @change="onChange(printer, $event)" class="form-control">
+                            <option v-for="type in ['marlin', 'klipper', 'klipperrun', 'octoprint', 'simulator']">${type}</option>
+                        </select>
+                    </div>
+
+                    <div v-if="config.type == 'marlin' || config.type == 'klipper'" class="form-group">
+                        <label>Port</label>
+                        <select v-if="config.node != ''" v-model="config.port" name="port_" @change="onChange(printer, $event)" class="form-control w-100">
+                            <option value="">EDIT</option>
+                            <option v-for="device in nodes[config.node].devices" :value="device.path">${device.path} (${device.printer})</option>
+                        </select>
+                        <input v-model="config.port" name="port" type="text" class="form-control w-50" placeholder="Serial-Device">
+                    </div>
+
+                    <div v-if="config.type == 'marlin' || config.type == 'klipper'" class="form-group">
+                        <label>Baud</label>
+                        <select v-model="config.baud" name="baud" @change="onChange(printer, $event)" class="form-control">
+                            <option v-for="type in ['9600', '19200', '38400', '57600', '115200', '250000', '500000', '576000', '921600']">${type}</option>
+                        </select>
+                    </div>
+
+                    <div v-if="config.type == 'marlin' || config.type == 'klipper' || config.type == 'klipperrun'" class="form-group">
+                        <label>CMD-Buffer</label>
+                        <input v-model="config.cmdbuffer" name="cmdbuffer" type="text" class="form-control" placeholder="Commands in Buffer (PingPong = 0)">
+                    </div>
+
+                    <div v-if="config.type == 'klipperrun'" class="form-group">
+                        <label>Klipper-Config</label>
+                        <select v-model="config.kconfig" name="kconfig_" @change="onChange(printer, $event)" class="form-control w-100">
+                            <option value="">EDIT</option>
+                            <option v-for="kconfig in nodes[config.node].kconfigs" :value="kconfig.path">${kconfig.path} (${kconfig.printer})</option>
+                        </select>
+                        <input v-model="config.kconfig" name="kconfig" type="text" class="form-control w-50" placeholder="Klipper-Config">
+                    </div>
+
+                    <div v-if="config.type == 'octoprint'" class="form-group">
+                        <label>URL</label>
+                        <input v-model="config.url" name="url" type="text" class="form-control" placeholder="URL to Octoprint-Server">
+                    </div>
+                    <div v-if="config.type == 'octoprint'" class="form-group">
+                        <label>API-Key</label>
+                        <input v-model="config.apikey" name="apikey" type="text" class="form-control" placeholder="API-Key of Octoprint">
+                    </div>
+                    <div v-if="config.type == 'octoprint'" class="form-group">
+                        <label>Show Webcam</label>
+                        <select v-model="config.webcam" name="webcam" @change="onChange(printer, $event)" class="form-control">
+                            <option v-for="type in ['0', '1']">${type}</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Filament</label>
+                        <select v-model="config.filament" name="filament" @change="onChange(printer, $event)" class="form-control">
+                            <option v-for="filament in config.filament_types">${filament}</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Filament-Types</label>
+                        <input v-model="config.filament_types" name="filament_types" type="text" class="form-control" placeholder="list Filament-Types">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Groups</label>
+                        <input v-model="config.groups" type="text" name="groups" class="form-control" placeholder="list of Groups">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Image</label>
+                        <select v-model="config.image" name="image" @change="onChange(printer, $event)" class="form-control">
+                            <option v-for="image in images">${image}</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="btn-group show">
+                            <button type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">DELETE</button>
+                            <div class="dropdown-menu" x-placement="bottom-start" style="position: absolute; will-change: transform; top: 0px; left: 0px; transform: translate3d(0px, 32px, 0px);">
+                                <a class="dropdown-item" href="#" :name="printer" onclick="window.location.href = '/printer-setup?printer=' + this.name + '&delete=printer';">Realy DELETE</a>
+                            </div>
+                        </div>
+
+                        <button type="button" class="btn btn-warning float-right" data-bs-dismiss="modal" onclick="window.location.href = '/printer';">Cancel</button>
+                        <button type="submit" class="btn btn-success float-right">Save</button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+
+        <div class="col-3">
+            <img width="100%" :src="getPrinterImage(config.image)" /><br />
+            <img width="100%" v-if="config.webcam == '1'" :src="getCamUrl(config.url)" /><br />
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+
+            <div class="card card-block sameheight-item">
+              <div class="card-body">
+                <h4>Status:</h4>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th width="20%">Key</th>
+                            <th>Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="value, key in printerStatus[printer]">
+                            <th scope="row">${key}</th>
+                            <td >${value}</td>
+                        </tr>
+                    </tbody>
+                </table>
+              </div>
+            </div>
+
+        </div>
+    </div>
+
+</section>
+
+
+<script>
+
+    var vprinter = new Vue({
+        el: '#printersetup',
+        delimiters: ['${', '}'],
+
+        data: {
+            printerConfig: {{data.printerConfig|safe}},
+            printerStatus: {{data.printerStatus|safe}},
+            config: {{data.printerConfig[printer]|safe}},
+            printer: '{{printer|safe}}',
+            nodes: {{data.node|safe}},
+            images: {{images|sort|safe}},
+        },
+
+        methods: {
+            idFormat(name) {
+                return name.toLowerCase().replaceAll(" ", "_").replaceAll("-", "_");
+            },
+            getCamUrl(url) {
+                return url + "/webcam/?action=stream";
+            },
+            getPrinterImage(image) {
+                return "/image?image=" + image;
+            },
+            getJobImage(jid) {
+                return "/image?job=" + jid;
+            },
+            onChange:function(printer, event){
+                console.log(printer, event.target.value);
+                //filament_set(printer, event.target.value);
+            },
+        },
+    })
+
+</script>
+
+{% endblock %}

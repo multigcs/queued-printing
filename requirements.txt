@@ -1,0 +1,12 @@
+psutil==5.8.0
+Flask==2.0.1
+Flask-SocketIO==5.1.1
+python-socketio==5.4.0
+pyserial==3.5b0
+setproctitle==1.1.10
+websocket-client==1.2.1
+# for klipper
+greenlet==1.1.2
+cffi==1.14.4
+# for documentation
+pdoc==8.0.0

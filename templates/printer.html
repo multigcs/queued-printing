@@ -1,0 +1,156 @@
+{% extends "layout.html" %}
+{% block content %}
+
+
+<section id="printers" class="section">
+
+    <div class="title-search-block">
+        <div class="title-block">
+            <div class="row">
+                <div class="col-md-12">
+                    <h3 class="title">Printer <a href="/printer-setup?printer=new" class="btn btn-primary btn-sm rounded-s float-right"> Add New </a></h3>
+                    <input v-model="search" type="text" class="form-control boxed rounded-s w-25" placeholder="Search for...">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="accordion">
+
+      <div v-for="(printer, printerId, index) in printerConfig" v-if="filter(printer)" class="card">
+
+        <div class="card-header row" id="headingOne"  data-toggle="collapse" :data-target="'#ac_' + index" aria-expanded="true" :aria-controls="'ac_' + index">
+
+            <div class="col-1">
+                <img style="max-height: 120px;" v-if="printer.webcam == '1'" :src="getCamUrl(printer.url)" />
+                <img style="max-height: 120px;" v-else-if="printerStatus[printerId].active.jobId" :src="getJobImage(printerStatus[printerId].active)" />
+                <img style="max-height: 120px;" v-else :src="getPrinterImage(printer.image)" />
+            </div>
+            <div class="col-1">
+                ${printer.name}
+            </div>
+            <div class="col-1">
+                <i v-if="printerStatus[printerId].status == 'STARTUP'" class="text-info">${printerStatus[printerId].status}</i>
+                <i v-else-if="printerStatus[printerId].status == 'STANDBY'" class="text-success">${printerStatus[printerId].status}</i>
+                <i v-else-if="printerStatus[printerId].status == 'INIT'" class="text-warning">${printerStatus[printerId].status}</i>
+                <i v-else-if="printerStatus[printerId].status == 'HEATING'" class="text-warning">${printerStatus[printerId].status}</i>
+                <i v-else-if="printerStatus[printerId].status == 'PRINTING'" class="text-info">${printerStatus[printerId].status}</i>
+                <i v-else-if="printerStatus[printerId].status == 'FINISHED'" class="text-success">${printerStatus[printerId].status}</i>
+                <i v-else class="text-danger">${printerStatus[printerId].status}</i>
+            </div>
+            <div class="col-1">
+                ${printerStatus[printerId].percent} %<br />
+                ${printerStatus[printerId].remaining} minutes
+            </div>
+            <div class="col-2">
+                Hotend: ${printerStatus[printerId].hotend} / ${printerStatus[printerId].hotend_set} °C<br />
+                Bed: ${printerStatus[printerId].bed} / ${printerStatus[printerId].bed_set} °C
+            </div>
+            <div class="col-1">
+                ${printer.filament}
+            </div>
+            <div class="col-1">
+                ${printer.groups}
+            </div>
+            <div class="col-1">
+                ${printer.node}
+            </div>
+            <div class="col-1">
+                <!--chartjs-line :max="300" :stepsize="1000" :labels="chart_labels" :data="printerStatus[printerId].hotend_history" :bind="true" bordercolor="#FF0000"></chartjs-line-->
+            </div>
+            <div class="col-1">
+                <!--chartjs-line :max="100" :stepsize="25" :labels="chart_labels" :data="printerStatus[printerId].bed_history" :bind="true"></chartjs-line-->
+            </div>
+            <div class="col-1">
+                <button v-if="printerStatus[printerId].status == 'STANDBY'" type="button" class="w-100 btn btn-primary" data-bs-dismiss="modal" :name="printerId" onclick="job_list(this.name);">SET JOB</button>
+                <button v-if="printerStatus[printerId].type != 'repetierserver'" type="button" class="w-100 btn btn-sm btn-warning" data-bs-dismiss="modal" :name="printerId" onclick="window.location.href = '/printer-setup?printer=' + this.name;">SETUP</button>
+            </div>
+
+        </div>
+
+        <div :id="'ac_' + index" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
+          <div class="card-body">
+
+            <h4>Status:</h4>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th width="20%">Key</th>
+                        <th>Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="value, key in printerStatus[printerId]">
+                        <th scope="row">${key}</th>
+                        <td >${value}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h4>Config:</h4>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th width="20%">Key</th>
+                        <th>Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="value, key in printerConfig[printerId]">
+                        <th scope="row">${key}</th>
+                        <td >${value}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+</section>
+
+
+
+
+<script>
+
+    var vprinter = new Vue({
+        el: '#printers',
+        delimiters: ['${', '}'],
+
+        data: {
+            search: "",
+            printerConfig: {{data.printerConfig|safe}},
+            printerStatus: {{data.printerStatus|safe}},
+            chart_labels: ['', '', '', '', '', '', '', '', '', ''],
+        },
+
+        methods: {
+            filter(printer) {
+                if (this.search == "" || printer.name.toLowerCase().search(this.search.toLowerCase()) >=0) {
+                    return true;
+                }
+                return false;
+            },
+            getCamUrl(url) {
+                return url + "/webcam/?action=stream";
+            },
+            getPrinterImage(image) {
+                return "/image?image=" + image;
+            },
+            getJobImage(job) {
+                return "/image?job=" + job.jobId;
+            },
+            onChange:function(printer, event){
+                console.log(event.target.value);
+                filament_set(printer, event.target.value);
+            },
+        },
+    })
+
+</script>
+
+{% endblock %}
