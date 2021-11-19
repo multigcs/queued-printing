@@ -88,7 +88,7 @@ def task_main():
                 print("execute command: ", cmd)
 
         job = job_get(master, port, shared["active_job"])
-        if job:
+        if job and "filename" in job:
             pprint.pprint(job)
 
             print(job["filename"], flush=True)
@@ -119,8 +119,11 @@ def task_main():
 
             while shared["running"]:
 
-                print("get printer")
+                print("get printer", flush=True)
                 octostatus = opclient.printer()
+
+                print("octostatus", octostatus, flush=True)
+
                 hotend = octostatus.get("temperature", {}).get("tool0", {})
                 bed = octostatus.get("temperature", {}).get("bed", {})
                 shared["status"]["hotend"] = round(hotend.get("actual") or 0)
@@ -139,11 +142,13 @@ def task_main():
                 }
                 shared["status"]["active"] = active_job
 
-                print(shared["status"])
+                print(shared["status"], flush=True)
                 time.sleep(1)
 
-                print("get job")
+                print("get job", flush=True)
                 jobinfo = opclient.job_info()
+                print("jobinfo", jobinfo, flush=True)
+
                 progress = jobinfo.get("progress", {})
                 shared["status"]["percent"] = round(progress.get("completion") or 0)
                 shared["status"]["time"] = round((progress.get("printTime") or 0) / 60)
@@ -151,7 +156,7 @@ def task_main():
                     (progress.get("printTimeLeft") or 0) / 60
                 )
                 shared["status"]["duration"] = duration
-                print(shared["status"])
+                print(shared["status"], flush=True)
                 time.sleep(1)
 
                 if shared["mode"] == "OPERATIONAL":
@@ -175,6 +180,7 @@ def task_main():
         else:
 
             octostatus = opclient.printer()
+            print("octostatus", octostatus, flush=True)
 
             hotend = octostatus.get("temperature", {}).get("tool0", {})
             bed = octostatus.get("temperature", {}).get("bed", {})
@@ -188,10 +194,35 @@ def task_main():
                 shared["mode"] = "STANDBY"
             shared["status"]["status"] = shared["mode"]
 
-            shared["active_job"] = {}
+            time.sleep(1)
+            jobinfo = opclient.job_info()
+            print("jobinfo", jobinfo, flush=True)
+
+           
+            jobame = jobinfo.get("job", {}).get("file", {}).get("name", "")
+            print("jobame", jobame)
+
+            if jobame:
+                shared["active_job"] = {
+                    "jobId": jobame,
+                    "traceId": "",
+                    "status": "PRINTING",
+                }
+            else:
+                shared["active_job"] = {}
             shared["status"]["active"] = shared["active_job"]
 
-            print(shared["status"])
+
+            progress = jobinfo.get("progress", {})
+            shared["status"]["percent"] = round(progress.get("completion") or 0)
+            shared["status"]["time"] = round((progress.get("printTime") or 0) / 60)
+            shared["status"]["remaining"] = round(
+                (progress.get("printTimeLeft") or 0) / 60
+            )
+            shared["status"]["duration"] = 0
+            print(shared["status"], flush=True)
+
+
 
             time.sleep(1)
 
