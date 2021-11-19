@@ -5,8 +5,8 @@ Queued-Printing - 3D-Printing-Server
 
 ## quikstart
 ```
-pip3 install -r requirements.txt
 apt-get install `cat requirements-apt.txt`
+pip3 install -r requirements.txt
 
 sh run.sh
 ```

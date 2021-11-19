@@ -5,6 +5,8 @@ python-socketio==5.4.0
 pyserial==3.5b0
 setproctitle==1.1.10
 websocket-client==1.2.1
+eventlet==0.32.0
+requests
 # for klipper
 greenlet==1.1.2
 cffi==1.14.4
