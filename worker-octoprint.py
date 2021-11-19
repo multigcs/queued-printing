@@ -219,7 +219,7 @@ def task_main():
             shared["status"]["remaining"] = round(
                 (progress.get("printTimeLeft") or 0) / 60
             )
-            shared["status"]["duration"] = 0
+            shared["status"]["duration"] = (progress.get("printTime") + progress.get("printTimeLeft")) or 0
             print(shared["status"], flush=True)
 
 
