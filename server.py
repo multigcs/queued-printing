@@ -254,7 +254,7 @@ def jobs_reload():
     """
     global shared
     projects = {}
-    for project_dir in glob.glob(f"jobs/*"):
+    for project_dir in glob.glob("jobs/*"):
         projectName = project_dir.split("/")[-1]
         if not shared["activeProject"]:
             shared["activeProject"] = projectName
@@ -529,8 +529,8 @@ def multiprinter_thread():
                                     )
                                     printerStatus["status"] = "PRINTING"
                                     printerStatus["active"] = {
-                                        "jobId": jobInfo["job"],
-                                        "traceId": jobInfo["job"],
+                                        "jobId": jobInfo["job"].replace("_", "/"),
+                                        "traceId": jobInfo["job"].replace("_", "/"),
                                         "status": "PRINTING",
                                     }
                                     printerStatus["percent"] = round(jobInfo["done"])
@@ -638,24 +638,31 @@ def update(message):
                 and printerStatus["ready"]
             ):
                 if printerConfig["type"] == "repetierserver":
-                    repetier.printer_upload(
+                    ret = repetier.printer_upload(
                         printerConfig["url"],
                         printerConfig["apiKey"],
                         printerConfig["nameOrigin"],
                         f"jobs/{jobId}/data.gcode",
-                        jobId,
+                        jobId.replace("/", "_"),
                     )
-
+                    if ret == b'{"data":[]}':
+                        jobData["printed"] = int(jobData["printed"]) + 1
+                        open(f"jobs/{jobId}/jobfile.json", "w").write(
+                            json.dumps(jobData, indent=4)
+                        )
+                        update = True
+                    else:
+                        print("ERROR", ret)
                 else:
                     printerCommands["next"] = jobId
                     printerStatus["ready"] = 0
                     printerStatus["status"] = "JOB"
 
-                jobData["printed"] = int(jobData["printed"]) + 1
-                open(f"jobs/{jobId}/jobfile.json", "w").write(
-                    json.dumps(jobData, indent=4)
-                )
-                update = True
+                    jobData["printed"] = int(jobData["printed"]) + 1
+                    open(f"jobs/{jobId}/jobfile.json", "w").write(
+                        json.dumps(jobData, indent=4)
+                    )
+                    update = True
 
         if "status" in message:
             update = False
@@ -906,6 +913,35 @@ def page_node_setup():
             open("config/nodes.json", "w").write(json.dumps(shared["node"], indent=4))
 
     return page_nodes()
+
+
+@app.route("/project-setup", methods=["GET", "POST"])
+def page_project_setup():
+    """
+    This function generates the project setup-page
+    """
+    project = request.args.get("project")
+    oldProject = request.args.get("old_project")
+    delete = request.args.get("delete")
+
+    if delete == "project" and project:
+        if os.path.isdir(f"jobs/{project}"):
+            rmtree(f"jobs/{project}")
+            jobs_reload()
+            return page_jobs()
+
+    if oldProject == "None" and project:
+        os.mkdir(f"jobs/{project}", 0o755)
+        shared["activeProject"] = project
+        jobs_reload()
+        return page_jobs()
+
+    return render_template(
+        "project_setup.html",
+        data=shared,
+        project=project,
+        page="jobs",
+    )
 
 
 @app.route("/job-setup", methods=["GET", "POST"])

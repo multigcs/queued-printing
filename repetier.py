@@ -77,4 +77,5 @@ def printer_upload(url, apiKey, printerSlug, filepath, targetname=None):
     }
     headers = {"x-api-key": apiKey}
     response = requests.post(posturl, files=multipart_form_data, headers=headers)
-    print(response.content)
+    print(response)
+    return (response.content)

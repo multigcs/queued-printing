@@ -1,0 +1,4 @@
+[flake8]
+#select = W,F
+
+ignore = E501, W503

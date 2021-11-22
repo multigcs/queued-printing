@@ -1,0 +1,45 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<section id="projectsetup" class="section">
+
+    <div class="row">
+        <div class="col-9">
+
+            <div class="card card-block sameheight-item">
+                <div class="title-block">
+                    <h3 class="title">Project: {{data.project[project]}}</h3>
+                </div>
+                <form role="form" action="/project-setup" method="get">
+
+                    <input value="{{project}}" name="old_project" type="hidden">
+
+                    <div class="form-group">
+                        <label>Project-Name</label>
+                        <input type="text" class="form-control" name="project" value="{{data.project[project]}}" placeholder="Project-Name">
+                    </div>
+
+                    <div class="form-group">
+                        <div class="btn-group show">
+                            <button type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">DELETE</button>
+                            <div class="dropdown-menu" x-placement="bottom-start" style="position: absolute; will-change: transform; top: 0px; left: 0px; transform: translate3d(0px, 32px, 0px);">
+                                <a class="dropdown-item" href="#" :name="job" onclick="window.location.href = '/project-setup?job={{job}}&delete=project';">Realy DELETE</a>
+                            </div>
+                        </div>
+
+                        <button type="button" class="btn btn-warning float-right" data-bs-dismiss="modal" onclick="window.location.href = '/jobs';">Cancel</button>
+                        <button type="submit" class="btn btn-success float-right">Save</button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+
+        <div class="col-3">
+            <img width="100%" src="/image?job={{job}}" /><br />
+        </div>
+    </div>
+
+</section>
+
+{% endblock %}
