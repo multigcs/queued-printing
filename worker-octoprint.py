@@ -198,7 +198,6 @@ def task_main():
             jobinfo = opclient.job_info()
             print("jobinfo", jobinfo, flush=True)
 
-           
             jobame = jobinfo.get("job", {}).get("file", {}).get("name", "")
             print("jobame", jobame)
 
@@ -212,17 +211,16 @@ def task_main():
                 shared["active_job"] = {}
             shared["status"]["active"] = shared["active_job"]
 
-
             progress = jobinfo.get("progress", {})
             shared["status"]["percent"] = round(progress.get("completion") or 0)
             shared["status"]["time"] = round((progress.get("printTime") or 0) / 60)
             shared["status"]["remaining"] = round(
                 (progress.get("printTimeLeft") or 0) / 60
             )
-            shared["status"]["duration"] = (progress.get("printTime") + progress.get("printTimeLeft")) or 0
+            shared["status"]["duration"] = (
+                progress.get("printTime") + progress.get("printTimeLeft")
+            ) or 0
             print(shared["status"], flush=True)
-
-
 
             time.sleep(1)
 
