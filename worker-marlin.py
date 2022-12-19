@@ -1,12 +1,13 @@
-import setproctitle
+import argparse
 import pprint
 import re
 import time
-import socketio
-import argparse
-from qclient import job_get, gcode_get, update_task, update_message, printerconfig_get
 
 import serial
+import setproctitle
+import socketio
+
+from qclient import gcode_get, job_get, printerconfig_get, update_message, update_task
 
 regex_start = re.compile("G[01] .*E[1-9]{1,10}")
 
@@ -277,7 +278,7 @@ def task_main():
 
     # send N commands without waiting, so we have N commands in the buffer
     cmdbuffer = int(shared["config"].get("cmdbuffer", 0))
-    for n in [range(0, cmdbuffer)]:
+    for _n in [range(0, cmdbuffer)]:
         send("G0")
 
     while shared["running"]:

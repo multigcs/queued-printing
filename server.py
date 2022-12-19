@@ -24,32 +24,33 @@ python3 server.py
 
 """
 
-import traceback
 import copy
-import psutil
 import datetime
-import uuid
-import subprocess
 import glob
-import os
-from shutil import copyfile, rmtree
 import json
+import os
+import socket
+import subprocess
 import time
+import traceback
+import urllib
+import uuid
+from shutil import copyfile, rmtree
 from threading import Lock
+
+import psutil
 from flask import (
     Flask,
+    Response,
     render_template,
     request,
-    send_from_directory,
     send_file,
-    Response,
+    send_from_directory,
 )
 from flask_socketio import SocketIO
-import socket
-import urllib
 
 import repetier
-from gcode import gcode_analyze, gcode_thumbs, gcode_info
+from gcode import gcode_analyze, gcode_info, gcode_thumbs
 
 async_mode = None
 thread = None
@@ -171,7 +172,7 @@ def printers_reload():
                 shared["printerConfig"][printerId][key] = value
 
     try:
-        for printserverId, printserverData in shared["multiprintserver"].items():
+        for printserverData in shared["multiprintserver"].values():
             if (
                 printserverData.get("active") == "1"
                 and printserverData.get("type") == "repetierserver"
@@ -320,7 +321,7 @@ def printer_graph_history():
     This function adds new values to the history graphs for each printer
     """
     global shared
-    for printer, printerConfig in shared["printerConfig"].items():
+    for printer in shared["printerConfig"]:
         printerStatus = shared["printerStatus"][printer]
         for key in ["hotend", "bed", "hotend_set", "bed_set"]:
             hkey = f"{key}_history"
@@ -337,7 +338,7 @@ def node_timeout_check():
     This function checks the timeout of each node
     """
     global shared
-    for nodeName, nodeData in shared["node"].items():
+    for nodeData in shared["node"].values():
         last_seen = nodeData.get("last_seen", 0)
         if time.time() > last_seen + 20:
             nodeData["status"] = "OFFLINE"
@@ -348,7 +349,7 @@ def printer_timeout_check():
     This function checks the timeout of each printer
     """
     global shared
-    for printerId, printerStatus in shared["printerStatus"].items():
+    for printerStatus in shared["printerStatus"].values():
         last_seen = printerStatus.get("last_seen", 0)
         if time.time() > last_seen + 20:
             if printerStatus["running"] == "1":
@@ -368,7 +369,7 @@ def printer_updates_send(printerId):
         printerStatus = shared["printerStatus"][printerId]
         printerCommands = shared["printerCommands"][printerId]
 
-        for clientId, clientData in shared["client"].copy().items():
+        for clientData in shared["client"].copy().values():
             clientName = clientData.get("name")
             ctype = clientData.get("type")
             sid = clientData.get("sid")
@@ -485,9 +486,7 @@ def multiprinter_thread():
             if time.time() >= multiserver_last_update + multiserver_interval:
                 multiserver_last_update = time.time()
 
-                for printserverId, printserverData in shared[
-                    "multiprintserver"
-                ].items():
+                for printserverData in shared["multiprintserver"].values():
                     if (
                         printserverData.get("active") == "1"
                         and printserverData.get("type") == "repetierserver"
@@ -610,7 +609,7 @@ def update(message):
                     nodeData["devices"][device]["rpiport"] = rpiport
                     nodeData["devices"][device]["hubport"] = hubport
 
-                for printerId, printerConfig in shared["printerConfig"].items():
+                for printerConfig in shared["printerConfig"].values():
                     if clientName == printerConfig.get("node") and nodeData["devices"][
                         device
                     ]["path"] == printerConfig.get("port"):
@@ -774,7 +773,7 @@ def disconnect():
     callback function, called if a client are disconnected
     """
     global shared
-    for clientSid, clientData in shared["client"].copy().items():
+    for clientSid in shared["client"].copy():
         if clientSid == request.sid:
             del shared["client"][clientSid]
 
@@ -960,7 +959,7 @@ def page_job_setup():
 
     # generate list of printers and groups
     pgList = []
-    for printerId, printerConfig in shared["printerConfig"].items():
+    for printerConfig in shared["printerConfig"].values():
         if printerConfig["name"] not in pgList:
             pgList.append(printerConfig["name"])
         for group in printerConfig["groups"]:
@@ -1304,7 +1303,7 @@ def api_files_local():
                 "printer": "",
                 "printed": 0,
                 "parts": int(parts),
-                "autoprint": 0,
+                "autoprint": autoprint,
             }
             for key, value in info.items():
                 jobdata[key] = value

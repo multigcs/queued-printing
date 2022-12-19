@@ -1,12 +1,13 @@
-import setproctitle
+import argparse
 import os
 import pprint
 import time
+
+import setproctitle
 import socketio
-import argparse
-from qclient import job_get, gcode_get, update_task, update_message, printerconfig_get
 
 from octorest import OctoRest
+from qclient import gcode_get, job_get, printerconfig_get, update_message, update_task
 
 sio = socketio.Client(logger=False, engineio_logger=False)
 

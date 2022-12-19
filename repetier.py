@@ -1,6 +1,7 @@
 import json
-import requests
 import urllib.request
+
+import requests
 
 timeout = 1
 
