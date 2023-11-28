@@ -263,8 +263,10 @@ def jobs_reload():
 
     jobs = {}
     for spool_dir in glob.glob(f"jobs/{shared['activeProject']}/*"):
+    #for spool_dir in glob.glob(f"jobs/*/*"):
+        project_name = spool_dir.split("/")[-2]
         spool_name = spool_dir.split("/")[-1]
-        jobId = f"{shared['activeProject']}/{spool_name}"
+        jobId = f"{project_name}/{spool_name}"
         jobfile = f"{spool_dir}/jobfile.json"
         if os.path.isfile(jobfile):
             f = open(jobfile, "r")
@@ -341,6 +343,7 @@ def node_timeout_check():
         last_seen = nodeData.get("last_seen", 0)
         if time.time() > last_seen + 20:
             nodeData["status"] = "OFFLINE"
+            nodeData["worker"] = {}
 
 
 def printer_timeout_check():
@@ -445,7 +448,7 @@ def background_thread():
                 if not found:
                     print("try to start master node")
                     subprocess.run(
-                        "nohup python3 node.py -u 'ws://127.0.0.1:5000' -n 'master' > '/tmp/log_node-master.log' 2>&1 &",
+                        "nohup python3.9 node.py -u 'ws://127.0.0.1:5000' -n 'master' > '/tmp/log_node-master.log' 2>&1 &",
                         shell=True,
                     )
             except Exception:
@@ -586,6 +589,7 @@ def update(message):
             nodeData["system"] = message["system"]
             nodeData["status"] = "ONLINE"
             nodeData["last_seen"] = time.time()
+            nodeData["worker"] = message.get("worker", {})
             update = True
 
     # devices update from nodes
@@ -598,7 +602,6 @@ def update(message):
             nodeData["devices"] = message["devices"]
             nodeData["status"] = "ONLINE"
             nodeData["last_seen"] = time.time()
-
             for device in nodeData["devices"]:
                 if device.startswith("platform-") and ".usb-usb-0:1.1." in device:
                     rpiport = device.split(".")[3]
@@ -645,14 +648,11 @@ def update(message):
                         f"jobs/{jobId}/data.gcode",
                         jobId.replace("/", "_"),
                     )
-                    if ret == b'{"data":[]}':
-                        jobData["printed"] = int(jobData["printed"]) + 1
-                        open(f"jobs/{jobId}/jobfile.json", "w").write(
-                            json.dumps(jobData, indent=4)
-                        )
-                        update = True
-                    else:
-                        print("ERROR", ret)
+                    jobData["printed"] = int(jobData["printed"]) + 1
+                    open(f"jobs/{jobId}/jobfile.json", "w").write(
+                        json.dumps(jobData, indent=4)
+                    )
+                    update = True
                 else:
                     printerCommands["next"] = jobId
                     printerStatus["ready"] = 0
@@ -1177,6 +1177,9 @@ def page_clients():
     """
     This function generates the clients-page
     """
+    print(shared)
+    print("## ", shared["node"])
+
     return render_template("clients.html", data=shared, page="clients")
 
 
@@ -1217,7 +1220,7 @@ def image():
 
     if job and job in shared["job"]:
         jobData = shared["job"][job]
-        thumbs = jobData.get("thumbs", [])
+        thumbs = jobData.get("thumbs")
         if thumbs:
             filename = f"jobs/{job}/thumb_{thumbs[-1]}.jpg"
     elif image:

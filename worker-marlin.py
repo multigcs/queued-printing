@@ -135,8 +135,6 @@ def sendReceive(cmd):
     msg_decode(msg)
 
     timeout = time.time()
-
-    timeout = time.time()
     while shared["running"] and not msg.strip().startswith("ok"):
 
         if shared["svcommand"]:

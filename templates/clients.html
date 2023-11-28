@@ -23,4 +23,29 @@
     </tbody>
 </table>
 
+<h3>Worker-PID's:</h3>
+<table id="sorted" class="table table-striped table-hover">
+    <thead>
+        <tr>
+                <th>Node</th>
+                <th>Worker</th>
+                <th>PID</th>
+                <th>Action</th>
+            </tr>
+    </tbody>
+    <tbody>
+        {% for clientid in data.node %}
+            {% for workerid in data.node[clientid].worker %}
+                <tr>
+                    <td>{{clientid}}</td>
+                    <td>{{workerid}}</td>
+                    <td>{{data.node[clientid].worker[workerid]}}</td>
+                    <td><a href="#" onclick="svcommand_set('{{workerid}}', 'KILL');">KILL</a></td>
+                </tr>
+            {% endfor %}
+        {% endfor %}
+    </tbody>
+</table>
+
+
 {% endblock %}

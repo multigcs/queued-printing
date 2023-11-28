@@ -9,6 +9,7 @@ import argparse
 config = {}
 svcommands = {}
 deviceList = {}
+workerList = {}
 errors = {}
 running = True
 
@@ -78,6 +79,14 @@ def supervisor_task():
             cpu_count = psutil.cpu_count(logical=False)
             mem_usage = psutil.virtual_memory().percent
             disk_free = psutil.disk_usage("/").free
+
+            workerList = {}
+            for pid in psutil.process_iter():
+                pidName = pid.name()
+                if pidName.startswith("worker-"):
+                    pidDevice = pidName.split("-", 1)[-1]
+                    workerList[pidDevice] = pid.pid
+
             ips = {}
             for netDevice, netData in psutil.net_if_addrs().items():
                 if netDevice != "lo":
@@ -109,6 +118,7 @@ def supervisor_task():
                 {
                     "kconfigs": kconfigList,
                     "devices": deviceList,
+                    "worker": workerList,
                     "system": {
                         "cpucount": cpu_count,
                         "cpuusage": cpu_usage,

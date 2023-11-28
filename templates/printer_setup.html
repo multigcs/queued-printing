@@ -110,8 +110,16 @@
                             </div>
                         </div>
 
+                        <div class="btn-group show">
+                            <button type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">KILL</button>
+                            <div class="dropdown-menu" x-placement="bottom-start" style="position: absolute; will-change: transform; top: 0px; left: 0px; transform: translate3d(0px, 32px, 0px);">
+                                <a class="dropdown-item" href="#" :name="printer" onclick="svcommand_set(this.name, 'KILL');">Realy KILL</a>
+                            </div>
+                        </div>
+
                         <button type="button" class="btn btn-warning float-right" data-bs-dismiss="modal" onclick="window.location.href = '/printer';">Cancel</button>
                         <button type="submit" class="btn btn-success float-right">Save</button>
+
                     </div>
                 </form>
             </div>
