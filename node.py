@@ -1,10 +1,11 @@
-import setproctitle
-import subprocess
-import glob
-import psutil
-import time
-import socketio
 import argparse
+import glob
+import subprocess
+import time
+
+import psutil
+import setproctitle
+import socketio
 
 config = {}
 svcommands = {}

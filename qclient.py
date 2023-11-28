@@ -1,6 +1,6 @@
-import urllib.request
 import json
 import time
+import urllib.request
 
 
 def job_get(master, port, active):
