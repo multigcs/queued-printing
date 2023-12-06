@@ -449,11 +449,11 @@ def background_thread():
                 if not found:
                     print("try to start master node")
                     subprocess.run(
-                        "nohup python3.9 node.py -u 'ws://127.0.0.1:5000' -n 'master' > '/tmp/log_node-master.log' 2>&1 &",
+                        "nohup python3 node.py -u 'ws://127.0.0.1:5000' -n 'master' > '/tmp/log_node-master.log' 2>&1 &",
                         shell=True,
                     )
             except Exception:
-                pass
+                print("error")
 
             node_timeout_check()
             printer_timeout_check()
@@ -1291,7 +1291,7 @@ def api_files_local():
             info = gcode_info(jobId)
 
             autoprint = 0
-            if do_print:
+            if do_print == 'true' or do_print == True:
                 autoprint = 1
 
             if not filename:
